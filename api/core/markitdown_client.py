@@ -139,50 +139,6 @@ class MarkItDownClient:
             future.cancel()
             raise TimeoutError(f"Conversion timed out after {timeout} seconds")
 
-    def convert_url(
-        self,
-        url: str,
-        timeout: float = 120.0,
-        headers: dict = None,
-    ) -> tuple[str, Optional[str]]:
-        """
-        Convert a URL to markdown.
-
-        Args:
-            url: The URL to convert (http, https, data URI).
-            timeout: Conversion timeout in seconds.
-            headers: Optional HTTP headers (e.g., {'Cookie': 'session=xxx'}) for authenticated URLs.
-
-        Returns:
-            Tuple of (markdown_content, title)
-
-        Raises:
-            UnsupportedFormatException: If the URL format is not supported.
-            FileConversionException: If conversion fails.
-            TimeoutError: If conversion takes too long.
-        """
-        def _do_convert():
-            instance = self._get_instance()
-            try:
-                # If custom headers are provided, make a direct requests call
-                if headers:
-                    import requests
-                    response = requests.get(url, headers=headers, stream=True)
-                    response.raise_for_status()
-                    result = instance.convert_response(response)
-                else:
-                    result = instance.convert_uri(url)
-                return result.markdown, result.title
-            finally:
-                self._return_instance(instance)
-
-        future = self._executor.submit(_do_convert)
-        try:
-            return future.result(timeout=timeout)
-        except TimeoutError:
-            future.cancel()
-            raise TimeoutError(f"Conversion timed out after {timeout} seconds")
-
     def shutdown(self) -> None:
         """Shutdown the client, releasing all resources."""
         self._executor.shutdown(wait=True)

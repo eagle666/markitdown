@@ -41,17 +41,18 @@ app = FastAPI(
     description="""
     MarkItDown API - Convert various file formats to Markdown.
 
-    This API allows you to convert documents, images, audio, and web content
-    to Markdown format, optimized for use with LLMs.
+    Upload a file and get its contents converted to Markdown format,
+    optimized for use with LLMs.
 
-    ## Features
+    ## Supported Formats
 
-    - **File Conversion**: Upload PDF, DOCX, PPTX, XLSX, and more
-    - **URL Conversion**: Convert web pages, YouTube videos, Wikipedia articles
-    - **Image OCR**: Extract text from images
-    - **Audio Transcription**: Convert speech in audio files to text
-
-    Note: Authentication and rate limiting are handled by the API gateway (RapidAPI).
+    - Documents: PDF, DOCX, PPTX, XLSX, XLS
+    - Web: HTML
+    - Data: CSV, JSON, XML
+    - Archives: ZIP, EPUB
+    - Images: JPG, PNG, GIF, etc. (metadata and OCR)
+    - Audio: MP3, WAV, etc. (metadata and transcription)
+    - Notebook: IPYNB
     """,
     version=settings.app_version,
     docs_url="/docs",

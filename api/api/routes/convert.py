@@ -1,4 +1,4 @@
-"""Convert endpoints for file and URL conversion."""
+"""Convert endpoint for file upload."""
 
 import os
 import logging
@@ -12,7 +12,7 @@ from ...core.config import settings
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/convert", tags=["Conversion"])
+router = APIRouter(prefix="", tags=["Conversion"])
 
 
 class ConvertResponse(BaseModel):
@@ -21,12 +21,6 @@ class ConvertResponse(BaseModel):
     markdown: str = Field(..., description="Converted markdown content")
     title: Optional[str] = Field(None, description="Document title if available")
     format: str = Field(..., description="Detected file format")
-
-
-class ConvertURLRequest(BaseModel):
-    """Request model for URL conversion."""
-    url: str = Field(..., description="URL to convert (http, https, data URI)")
-    headers: Optional[dict] = Field(None, description="Optional HTTP headers (e.g., {'Cookie': 'session=xxx'}) for authenticated URLs")
 
 
 class ErrorDetail(BaseModel):
@@ -81,7 +75,7 @@ def validate_file_extension(filename: Optional[str]) -> None:
 
 
 @router.post(
-    "/file",
+    "/convert",
     response_model=ConvertResponse,
     responses={
         400: {"model": ErrorResponse, "description": "Unsupported file type"},
@@ -179,109 +173,6 @@ async def convert_file(
                 "error": {
                     "code": "CONVERSION_ERROR",
                     "message": f"Failed to convert file: {str(e)}",
-                }
-            },
-        )
-
-
-@router.post(
-    "/url",
-    response_model=ConvertResponse,
-    responses={
-        400: {"model": ErrorResponse, "description": "Invalid URL"},
-        500: {"model": ErrorResponse, "description": "Conversion error"},
-    },
-    summary="Convert URL to Markdown",
-    description="Convert a web page, YouTube video, or data URL to Markdown.",
-)
-async def convert_url(
-    url_request: ConvertURLRequest,
-):
-    """
-    Convert a URL to Markdown.
-
-    Supported URLs:
-    - Web pages (http, https)
-    - YouTube videos (transcription)
-    - Data URIs (inline content)
-    - Wikipedia articles
-    - RSS feeds
-    """
-    url = url_request.url.strip()
-
-    # Basic URL validation
-    if not url:
-        raise HTTPException(
-            status_code=400,
-            detail={
-                "error": {
-                    "code": "MISSING_URL",
-                    "message": "URL is required",
-                }
-            },
-        )
-
-    # Check URL scheme
-    valid_schemes = ("http", "https", "data")
-    if not any(url.startswith(f"{s}:") for s in valid_schemes):
-        raise HTTPException(
-            status_code=400,
-            detail={
-                "error": {
-                    "code": "INVALID_URL_SCHEME",
-                    "message": f"URL scheme must be one of: {', '.join(valid_schemes)}",
-                }
-            },
-        )
-
-    # Convert
-    client = get_markitdown_client()
-    try:
-        markdown, title = client.convert_url(url=url, headers=url_request.headers)
-
-        # Try to detect format from URL
-        from urllib.parse import urlparse
-        parsed = urlparse(url)
-        if "youtube.com" in parsed.netloc or "youtu.be" in parsed.netloc:
-            file_format = "YOUTUBE"
-        elif parsed.netloc == "wikipedia.org":
-            file_format = "WIKIPEDIA"
-        elif parsed.scheme == "data":
-            file_format = "DATA_URI"
-        else:
-            file_format = "WEB_PAGE"
-
-        logger.info(
-            f"Converted URL '{url}' to markdown "
-            f"(size: {len(markdown)} chars)"
-        )
-
-        return ConvertResponse(
-            success=True,
-            markdown=markdown,
-            title=title,
-            format=file_format,
-        )
-
-    except TimeoutError as e:
-        logger.error(f"Conversion timeout for URL '{url}': {e}")
-        raise HTTPException(
-            status_code=504,
-            detail={
-                "error": {
-                    "code": "CONVERSION_TIMEOUT",
-                    "message": "Conversion timed out. The resource may be too large or unavailable.",
-                }
-            },
-        )
-    except Exception as e:
-        logger.error(f"Conversion error for URL '{url}': {e}")
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "error": {
-                    "code": "CONVERSION_ERROR",
-                    "message": f"Failed to convert URL: {str(e)}",
                 }
             },
         )
