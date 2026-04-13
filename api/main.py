@@ -72,7 +72,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(health_router)
-app.include_router(convert_router)
+app.include_router(convert_router, prefix="/convert")
 
 
 @app.get("/", include_in_schema=False)

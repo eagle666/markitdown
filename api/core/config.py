@@ -30,13 +30,18 @@ class Settings(BaseSettings):
     max_file_size_mb: int = 1024  # 1GB
     max_file_size_bytes: int = 1024 * 1024 * 1024
     allowed_extensions: list[str] = [
+        # Documents
         ".pdf", ".pptx", ".docx", ".xlsx", ".xls",
-        ".html", ".htm", ".csv", ".json", ".xml",
+        # Web
+        ".html", ".htm",
+        # Data
+        ".csv", ".json", ".xml",
+        # Archives
         ".zip", ".epub", ".ipynb", ".md",
-        # Media (metadata/OCR)
+        # Images
         ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".tiff", ".tif",
-        # Audio
-        ".mp3", ".wav", ".flac", ".m4a", ".ogg",
+        # Audio/Video
+        ".mp3", ".wav", ".flac", ".m4a", ".ogg", ".mp4", ".avi", ".mkv", ".mov", ".wmv",
     ]
 
     # CORS

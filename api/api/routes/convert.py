@@ -75,7 +75,7 @@ def validate_file_extension(filename: Optional[str]) -> None:
 
 
 @router.post(
-    "/convert",
+    "/file",
     response_model=ConvertResponse,
     responses={
         400: {"model": ErrorResponse, "description": "Unsupported file type"},
