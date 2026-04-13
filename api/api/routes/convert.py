@@ -26,6 +26,7 @@ class ConvertResponse(BaseModel):
 class ConvertURLRequest(BaseModel):
     """Request model for URL conversion."""
     url: str = Field(..., description="URL to convert (http, https, data URI)")
+    headers: Optional[dict] = Field(None, description="Optional HTTP headers (e.g., {'Cookie': 'session=xxx'}) for authenticated URLs")
 
 
 class ErrorDetail(BaseModel):
@@ -236,7 +237,7 @@ async def convert_url(
     # Convert
     client = get_markitdown_client()
     try:
-        markdown, title = client.convert_url(url=url)
+        markdown, title = client.convert_url(url=url, headers=url_request.headers)
 
         # Try to detect format from URL
         from urllib.parse import urlparse

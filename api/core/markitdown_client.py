@@ -143,6 +143,7 @@ class MarkItDownClient:
         self,
         url: str,
         timeout: float = 120.0,
+        headers: dict = None,
     ) -> tuple[str, Optional[str]]:
         """
         Convert a URL to markdown.
@@ -150,6 +151,7 @@ class MarkItDownClient:
         Args:
             url: The URL to convert (http, https, data URI).
             timeout: Conversion timeout in seconds.
+            headers: Optional HTTP headers (e.g., {'Cookie': 'session=xxx'}) for authenticated URLs.
 
         Returns:
             Tuple of (markdown_content, title)
@@ -162,7 +164,14 @@ class MarkItDownClient:
         def _do_convert():
             instance = self._get_instance()
             try:
-                result = instance.convert_uri(url)
+                # If custom headers are provided, make a direct requests call
+                if headers:
+                    import requests
+                    response = requests.get(url, headers=headers, stream=True)
+                    response.raise_for_status()
+                    result = instance.convert_response(response)
+                else:
+                    result = instance.convert_uri(url)
                 return result.markdown, result.title
             finally:
                 self._return_instance(instance)
