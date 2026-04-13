@@ -40,8 +40,6 @@ class FormatsResponse(BaseModel):
 async def health_check():
     """
     Health check endpoint for load balancers and monitoring.
-
-    This endpoint does not require API key authentication.
     """
     return HealthResponse(
         status="healthy",
@@ -59,50 +57,64 @@ async def health_check():
 async def get_formats():
     """
     Get a list of all supported file formats.
-
-    Returns formats grouped by category with extension and name.
     """
-    formats = [
+    # Map extensions to names and categories
+    format_info = {
         # Documents
-        FormatInfo(extension=".pdf", name="PDF", category="document"),
-        FormatInfo(extension=".docx", name="Word Document", category="document"),
-        FormatInfo(extension=".pptx", name="PowerPoint", category="document"),
-        FormatInfo(extension=".xlsx", name="Excel Spreadsheet", category="document"),
-        FormatInfo(extension=".xls", name="Excel Spreadsheet (Legacy)", category="document"),
-
-        # Web & Data
-        FormatInfo(extension=".html", name="HTML", category="web"),
-        FormatInfo(extension=".htm", name="HTML", category="web"),
-        FormatInfo(extension=".csv", name="CSV", category="data"),
-        FormatInfo(extension=".json", name="JSON", category="data"),
-        FormatInfo(extension=".xml", name="XML", category="data"),
-
+        ".pdf": ("PDF", "document"),
+        ".docx": ("Word Document", "document"),
+        ".pptx": ("PowerPoint", "document"),
+        ".ppt": ("PowerPoint", "document"),
+        ".xlsx": ("Excel Spreadsheet", "document"),
+        ".xls": ("Excel Spreadsheet (Legacy)", "document"),
+        # Web
+        ".html": ("HTML", "web"),
+        ".htm": ("HTML", "web"),
+        # Data
+        ".csv": ("CSV", "data"),
+        ".json": ("JSON", "data"),
+        ".xml": ("XML", "data"),
         # Archives & Books
-        FormatInfo(extension=".zip", name="ZIP Archive", category="archive"),
-        FormatInfo(extension=".epub", name="EPUB E-Book", category="ebook"),
-        FormatInfo(extension=".ipynb", name="Jupyter Notebook", category="notebook"),
-
+        ".zip": ("ZIP Archive", "archive"),
+        ".epub": ("EPUB E-Book", "ebook"),
+        ".ipynb": ("Jupyter Notebook", "notebook"),
+        ".md": ("Markdown", "document"),
         # Images
-        FormatInfo(extension=".jpg", name="JPEG Image", category="image"),
-        FormatInfo(extension=".jpeg", name="JPEG Image", category="image"),
-        FormatInfo(extension=".png", name="PNG Image", category="image"),
-        FormatInfo(extension=".gif", name="GIF Image", category="image"),
-        FormatInfo(extension=".webp", name="WebP Image", category="image"),
-        FormatInfo(extension=".tiff", name="TIFF Image", category="image"),
-        FormatInfo(extension=".bmp", name="Bitmap Image", category="image"),
-
+        ".jpg": ("JPEG Image", "image"),
+        ".jpeg": ("JPEG Image", "image"),
+        ".png": ("PNG Image", "image"),
+        ".gif": ("GIF Image", "image"),
+        ".webp": ("WebP Image", "image"),
+        ".tiff": ("TIFF Image", "image"),
+        ".tif": ("TIFF Image", "image"),
+        ".bmp": ("Bitmap Image", "image"),
+        ".svg": ("SVG Image", "image"),
         # Audio
-        FormatInfo(extension=".mp3", name="MP3 Audio", category="audio"),
-        FormatInfo(extension=".wav", name="WAV Audio", category="audio"),
-        FormatInfo(extension=".flac", name="FLAC Audio", category="audio"),
-        FormatInfo(extension=".m4a", name="M4A Audio", category="audio"),
-        FormatInfo(extension=".ogg", name="OGG Audio", category="audio"),
+        ".mp3": ("MP3 Audio", "audio"),
+        ".wav": ("WAV Audio", "audio"),
+        ".flac": ("FLAC Audio", "audio"),
+        ".m4a": ("M4A Audio", "audio"),
+        ".ogg": ("OGG Audio", "audio"),
+        ".aac": ("AAC Audio", "audio"),
+        # Video
+        ".mp4": ("MP4 Video", "video"),
+        ".avi": ("AVI Video", "video"),
+        ".mkv": ("MKV Video", "video"),
+        ".mov": ("MOV Video", "video"),
+        ".wmv": ("WMV Video", "video"),
+        ".flv": ("FLV Video", "video"),
+        ".webm": ("WebM Video", "video"),
+    }
 
-        # Special
-        FormatInfo(extension="youtube", name="YouTube Video", category="special"),
-        FormatInfo(extension="wikipedia", name="Wikipedia Article", category="special"),
-        FormatInfo(extension="rss", name="RSS Feed", category="special"),
-    ]
+    formats = []
+    for ext in settings.allowed_extensions:
+        ext_lower = ext.lower()
+        if ext_lower in format_info:
+            name, category = format_info[ext_lower]
+        else:
+            name = ext_lower.lstrip(".").upper() + " File"
+            category = "other"
+        formats.append(FormatInfo(extension=ext, name=name, category=category))
 
     return FormatsResponse(
         formats=formats,

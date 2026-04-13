@@ -31,17 +31,19 @@ class Settings(BaseSettings):
     max_file_size_bytes: int = 1024 * 1024 * 1024
     allowed_extensions: list[str] = [
         # Documents
-        ".pdf", ".pptx", ".docx", ".xlsx", ".xls",
+        ".pdf", ".docx", ".doc", ".pptx", ".ppt", ".xlsx", ".xls",
         # Web
         ".html", ".htm",
         # Data
         ".csv", ".json", ".xml",
-        # Archives
+        # Archives & Books
         ".zip", ".epub", ".ipynb", ".md",
         # Images
-        ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".tiff", ".tif",
-        # Audio/Video
-        ".mp3", ".wav", ".flac", ".m4a", ".ogg", ".mp4", ".avi", ".mkv", ".mov", ".wmv",
+        ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".tiff", ".tif", ".svg",
+        # Audio
+        ".mp3", ".wav", ".flac", ".m4a", ".ogg", ".aac",
+        # Video
+        ".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".webm",
     ]
 
     # CORS
