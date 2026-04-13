@@ -1,12 +1,18 @@
 """Application configuration."""
 
 import os
-from pydantic_settings import BaseSettings
+from typing import Optional
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
 
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
+
+    model_config = SettingsConfigDict(
+        env_prefix="MARKITDOWN_",
+        case_sensitive=False,
+    )
 
     # API Settings
     app_name: str = "MarkItDown API"
@@ -44,11 +50,26 @@ class Settings(BaseSettings):
     cors_origins: list[str] = ["*"]
 
     # Authentication
-    api_keys: list[str] = os.getenv("MARKITDOWN_API_KEYS", "").split(",") if os.getenv("MARKITDOWN_API_KEYS") else []
+    # API keys as comma-separated string (e.g., "key1,key2,key3")
+    api_keys: str = ""  # Will be parsed from env or comma-separated
+    api_keys_required: bool = False
 
-    class Config:
-        env_prefix = "MARKITDOWN_"
-        case_sensitive = False
+    def model_post_init(self, *args, **kwargs):
+        """Parse api_keys after initialization."""
+        # Parse comma-separated API keys from the api_keys field
+        if self.api_keys:
+            # If api_keys is a comma-separated string, split it
+            if "," in self.api_keys:
+                self._api_keys_list = [k.strip() for k in self.api_keys.split(",") if k.strip()]
+            else:
+                self._api_keys_list = [self.api_keys.strip()] if self.api_keys.strip() else []
+        else:
+            self._api_keys_list = []
+
+    @property
+    def api_keys_list(self) -> list[str]:
+        """Get the list of API keys."""
+        return self._api_keys_list
 
 
 @lru_cache()

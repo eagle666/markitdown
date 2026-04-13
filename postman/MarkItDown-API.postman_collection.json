@@ -1,0 +1,196 @@
+{
+  "info": {
+    "name": "MarkItDown API",
+    "description": "REST API for converting various file formats to Markdown. Built on top of Microsoft's MarkItDown library.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8001"
+    },
+    {
+      "key": "apiKey",
+      "value": "test-key-123"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Check if the API is running and healthy. No authentication required."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Information",
+      "item": [
+        {
+          "name": "Get Supported Formats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/formats",
+              "host": ["{{baseUrl}}"],
+              "path": ["formats"]
+            },
+            "description": "Get a list of all supported file formats for conversion."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Conversion",
+      "item": [
+        {
+          "name": "Convert File to Markdown",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "description": "The file to convert"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/convert/file",
+              "host": ["{{baseUrl}}"],
+              "path": ["convert", "file"]
+            },
+            "description": "Upload a file and get its contents converted to Markdown format. Supports PDF, DOCX, PPTX, XLSX, images, audio, and more."
+          },
+          "response": []
+        },
+        {
+          "name": "Convert URL to Markdown",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"url\": \"https://httpbin.org/html\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/convert/url",
+              "host": ["{{baseUrl}}"],
+              "path": ["convert", "url"]
+            },
+            "description": "Convert a web page, YouTube video, Wikipedia article, or data URL to Markdown format."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Error Scenarios",
+      "item": [
+        {
+          "name": "Missing API Key",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/formats",
+              "host": ["{{baseUrl}}"],
+              "path": ["formats"]
+            },
+            "description": "Request without API key should return 401 error."
+          },
+          "response": []
+        },
+        {
+          "name": "Invalid API Key",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "invalid-key",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/formats",
+              "host": ["{{baseUrl}}"],
+              "path": ["formats"]
+            },
+            "description": "Request with invalid API key should return 401 error."
+          },
+          "response": []
+        },
+        {
+          "name": "Invalid URL Scheme",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"url\": \"ftp://example.com/file.pdf\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/convert/url",
+              "host": ["{{baseUrl}}"],
+              "path": ["convert", "url"]
+            },
+            "description": "Request with invalid URL scheme should return 400 error."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

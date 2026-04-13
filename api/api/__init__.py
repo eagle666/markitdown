@@ -1,5 +1,5 @@
 """API routes module."""
 
-from .routes import router
+from .routes import convert_router, health_router
 
-__all__ = ["router"]
+__all__ = ["convert_router", "health_router"]

@@ -8,8 +8,9 @@ from typing import Optional
 
 from fastapi import HTTPException, Request
 from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import JSONResponse
 
-from ..core.config import settings
+from ...core.config import settings
 
 
 @dataclass

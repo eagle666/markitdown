@@ -8,10 +8,10 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, R
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
-from ..core.markitdown_client import get_markitdown_client
-from ..core.config import settings
-from ..middleware.auth import verify_api_key
-from ..middleware.rate_limit import check_rate_limit
+from ...core.markitdown_client import get_markitdown_client
+from ...core.config import settings
+from ...api.middleware.auth import verify_api_key
+from ...api.middleware.rate_limit import check_rate_limit
 
 logger = logging.getLogger(__name__)
 

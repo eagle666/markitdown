@@ -1,0 +1,441 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "MarkItDown API",
+    "description": "Convert various file formats to Markdown for LLMs. Supports PDF, DOCX, PPTX, XLSX, images, audio, YouTube, Wikipedia, and more.",
+    "version": "0.1.0",
+    "contact": {
+      "name": "MarkItDown API Support"
+    },
+    "license": {
+      "name": "MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000",
+      "description": "Local development server"
+    },
+    {
+      "url": "https://your-api-host.railway.app",
+      "description": "Production server (Railway)"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "Health check",
+        "description": "Check if the API is running and healthy. No authentication required.",
+        "operationId": "health_check",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                },
+                "example": {
+                  "status": "healthy",
+                  "version": "0.1.0",
+                  "service": "MarkItDown API"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/formats": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "Get supported formats",
+        "description": "Returns a list of all supported file formats for conversion.",
+        "operationId": "get_formats",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of supported formats",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FormatsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or missing API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/convert/file": {
+      "post": {
+        "tags": ["Conversion"],
+        "summary": "Convert file to Markdown",
+        "description": "Upload a file and get its contents converted to Markdown format. Supports PDF, DOCX, PPTX, XLSX, images, audio, and more.",
+        "operationId": "convert_file",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/ConvertFileRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Conversion successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConvertResponse"
+                },
+                "example": {
+                  "success": true,
+                  "markdown": "# Document Title\n\nThis is the converted content...",
+                  "title": "Document Title",
+                  "format": "PDF"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unsupported file type or empty file",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or missing API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "File too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Conversion error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Conversion timeout",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/convert/url": {
+      "post": {
+        "tags": ["Conversion"],
+        "summary": "Convert URL to Markdown",
+        "description": "Convert a web page, YouTube video, Wikipedia article, or data URL to Markdown format.",
+        "operationId": "convert_url",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConvertURLRequest"
+              },
+              "example": {
+                "url": "https://en.wikipedia.org/wiki/Python_(programming_language)"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Conversion successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConvertResponse"
+                },
+                "example": {
+                  "success": true,
+                  "markdown": "# Python (Programming Language)\n\nPython is a high-level...",
+                  "title": "Python (programming language) - Wikipedia",
+                  "format": "WIKIPEDIA"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or missing API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Conversion error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Conversion timeout",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key",
+        "description": "API key obtained from RapidAPI or provided by the service administrator."
+      }
+    },
+    "schemas": {
+      "HealthResponse": {
+        "type": "object",
+        "required": ["status", "version", "service"],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["healthy"],
+            "description": "Current health status"
+          },
+          "version": {
+            "type": "string",
+            "description": "API version"
+          },
+          "service": {
+            "type": "string",
+            "description": "Service name"
+          }
+        }
+      },
+      "FormatInfo": {
+        "type": "object",
+        "required": ["extension", "name", "category"],
+        "properties": {
+          "extension": {
+            "type": "string",
+            "description": "File extension or special identifier"
+          },
+          "name": {
+            "type": "string",
+            "description": "Human-readable format name"
+          },
+          "category": {
+            "type": "string",
+            "enum": ["document", "web", "data", "archive", "ebook", "image", "audio", "notebook", "special"],
+            "description": "Category of the file format"
+          }
+        }
+      },
+      "FormatsResponse": {
+        "type": "object",
+        "required": ["formats", "total_count", "max_file_size_mb"],
+        "properties": {
+          "formats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FormatInfo"
+            },
+            "description": "List of supported formats"
+          },
+          "total_count": {
+            "type": "integer",
+            "description": "Total number of supported formats"
+          },
+          "max_file_size_mb": {
+            "type": "integer",
+            "description": "Maximum allowed file size in megabytes"
+          }
+        }
+      },
+      "ConvertFileRequest": {
+        "type": "object",
+        "required": ["file"],
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "description": "The file to convert. Must be a supported file type."
+          }
+        }
+      },
+      "ConvertURLRequest": {
+        "type": "object",
+        "required": ["url"],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to convert. Supported: http://, https://, data:"
+          }
+        }
+      },
+      "ConvertResponse": {
+        "type": "object",
+        "required": ["success", "markdown", "format"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the conversion was successful"
+          },
+          "markdown": {
+            "type": "string",
+            "description": "The converted Markdown content"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true,
+            "description": "Document title if available"
+          },
+          "format": {
+            "type": "string",
+            "description": "Detected file format (e.g., PDF, DOCX, YOUTUBE, WIKIPEDIA)"
+          }
+        }
+      },
+      "ErrorDetail": {
+        "type": "object",
+        "required": ["code", "message"],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Error code for programmatic handling"
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable error message"
+          },
+          "details": {
+            "type": "object",
+            "nullable": true,
+            "description": "Additional error details"
+          },
+          "retry_after": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Seconds to wait before retrying (for rate limit errors)"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "required": ["error"],
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ErrorDetail"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Health",
+      "description": "Health check and service information endpoints"
+    },
+    {
+      "name": "Conversion",
+      "description": "File and URL to Markdown conversion endpoints"
+    }
+  ]
+}

@@ -5,7 +5,8 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
-from ..core.config import settings
+from ...core.config import settings
+from ...api.middleware.auth import verify_api_key
 
 router = APIRouter(tags=["Health"])
 
@@ -56,7 +57,7 @@ async def health_check():
     summary="Supported formats",
     description="Get list of all supported file formats for conversion.",
 )
-async def get_formats():
+async def get_formats(api_key: str = Depends(verify_api_key)):
     """
     Get a list of all supported file formats.
 
