@@ -1,0 +1,21 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "Dockerfile"
+  },
+  "deploy": {
+    "numReplicas": 2,
+    "maxReplicas": 10,
+    "healthcheckPath": "/health",
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
+  },
+  "environmentVariables": {
+    "MARKITDOWN_API_KEYS": "",
+    "MARKITDOWN_WORKERS": "4",
+    "MARKITDOWN_RATE_LIMIT_REQUESTS": "100",
+    "MARKITDOWN_RATE_LIMIT_WINDOW_SECONDS": "60",
+    "MARKITDOWN_MAX_FILE_SIZE_MB": "1024"
+  }
+}

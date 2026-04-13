@@ -1,0 +1,17 @@
+# MarkItDown API Dependencies
+
+# Core
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+
+# File handling
+python-multipart>=0.0.6
+aiofiles>=23.2.0
+
+# Utilities
+charset-normalizer>=3.3.0
+
+# MarkItDown core library
+-r requirements-core.txt
