@@ -9,8 +9,6 @@ from fastapi.responses import JSONResponse
 
 from .core.config import settings
 from .api.routes import convert_router, health_router
-from .api.middleware.rate_limit import RateLimitMiddleware
-from .api.middleware.auth import APIKeyAuthMiddleware
 
 # Configure logging
 logging.basicConfig(
@@ -27,7 +25,6 @@ async def lifespan(app: FastAPI):
     logger.info(f"Starting {settings.app_name} v{settings.app_version}")
     logger.info(f"MarkItDown pool size: {settings.markitdown_pool_size}")
     logger.info(f"Max file size: {settings.max_file_size_mb}MB")
-    logger.info(f"Rate limit: {settings.rate_limit_requests} requests per {settings.rate_limit_window_seconds}s")
 
     yield
 
@@ -54,14 +51,7 @@ app = FastAPI(
     - **Image OCR**: Extract text from images
     - **Audio Transcription**: Convert speech in audio files to text
 
-    ## Authentication
-
-    All endpoints (except /health) require an API key. Provide it via the
-    `X-API-Key` header.
-
-    ## Rate Limits
-
-    Default rate limit is 100 requests per minute per API key.
+    Note: Authentication and rate limiting are handled by the API gateway (RapidAPI).
     """,
     version=settings.app_version,
     docs_url="/docs",
@@ -78,12 +68,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Add rate limiting middleware
-app.add_middleware(RateLimitMiddleware)
-
-# Add API key auth middleware (logging only, actual auth via dependency)
-app.add_middleware(APIKeyAuthMiddleware)
 
 # Include routers
 app.include_router(health_router)

@@ -4,14 +4,11 @@ import os
 import logging
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Request
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, HTTPException, UploadFile, File, Request
 from pydantic import BaseModel, Field
 
 from ...core.markitdown_client import get_markitdown_client
 from ...core.config import settings
-from ...api.middleware.auth import verify_api_key
-from ...api.middleware.rate_limit import check_rate_limit
 
 logger = logging.getLogger(__name__)
 
@@ -87,9 +84,7 @@ def validate_file_extension(filename: Optional[str]) -> None:
     response_model=ConvertResponse,
     responses={
         400: {"model": ErrorResponse, "description": "Unsupported file type"},
-        401: {"model": ErrorResponse, "description": "Invalid or missing API key"},
         413: {"model": ErrorResponse, "description": "File too large"},
-        429: {"model": ErrorResponse, "description": "Rate limit exceeded"},
         500: {"model": ErrorResponse, "description": "Conversion error"},
     },
     summary="Convert file to Markdown",
@@ -98,8 +93,6 @@ def validate_file_extension(filename: Optional[str]) -> None:
 async def convert_file(
     request: Request,
     file: UploadFile = File(..., description="File to convert"),
-    api_key: str = Depends(verify_api_key),
-    rate_info: dict = Depends(check_rate_limit),
 ):
     """
     Convert an uploaded file to Markdown.
@@ -156,7 +149,7 @@ async def convert_file(
 
         logger.info(
             f"Converted file '{file.filename}' to markdown "
-            f"(size: {len(markdown)} chars, api_key: {api_key[:8]}...)"
+            f"(size: {len(markdown)} chars)"
         )
 
         return ConvertResponse(
@@ -195,8 +188,6 @@ async def convert_file(
     response_model=ConvertResponse,
     responses={
         400: {"model": ErrorResponse, "description": "Invalid URL"},
-        401: {"model": ErrorResponse, "description": "Invalid or missing API key"},
-        429: {"model": ErrorResponse, "description": "Rate limit exceeded"},
         500: {"model": ErrorResponse, "description": "Conversion error"},
     },
     summary="Convert URL to Markdown",
@@ -204,8 +195,6 @@ async def convert_file(
 )
 async def convert_url(
     url_request: ConvertURLRequest,
-    api_key: str = Depends(verify_api_key),
-    rate_info: dict = Depends(check_rate_limit),
 ):
     """
     Convert a URL to Markdown.
@@ -263,7 +252,7 @@ async def convert_url(
 
         logger.info(
             f"Converted URL '{url}' to markdown "
-            f"(size: {len(markdown)} chars, api_key: {api_key[:8]}...)"
+            f"(size: {len(markdown)} chars)"
         )
 
         return ConvertResponse(
